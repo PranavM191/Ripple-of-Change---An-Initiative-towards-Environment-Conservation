@@ -1,6 +1,6 @@
 package com.rippleofchange.api.config;
 
-import org.springframework.http.HttpMethod; // <-- Make sure this is imported
+import org.springframework.http.HttpMethod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,8 +50,12 @@ public class SecurityConfig {
                         // 4. Allow everyone to SEE the map data (GET), but not upload (POST)
                         .requestMatchers(HttpMethod.GET, "/api/hotspots").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/leaderboard").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/ngos").permitAll() // Allow public access to NGO list// Allow public access to leaderboard
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/recycling").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/ngos").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/recycling").permitAll()
+
+                        // ---> NEW LINE: Allow the routing math to be tested without a token <---
+                        .requestMatchers(HttpMethod.GET, "/api/facilities/**").permitAll()
+
                         // 5. Everything else requires a valid Token
                         .anyRequest().authenticated()
                 )
