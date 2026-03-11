@@ -34,13 +34,26 @@ const Hero = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground px-8">
-              Start a Cleanup Drive
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-            <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10">
-              Explore Impact Map
-            </Button>
+            
+            {/* Button 1: Start Drive */}
+            <a href="#start-drive">
+                <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground px-8 w-full sm:w-auto">
+                  Start a Cleanup Drive
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+            </a>
+
+            {/* Button 2: Impact Map (Fixed Visibility) */}
+            <a href="#impact-map">
+                <Button 
+                    size="lg" 
+                    variant="outline" 
+                    className="border-white text-white bg-black/20 hover:bg-white hover:text-primary w-full sm:w-auto transition-colors"
+                >
+                  Explore Impact Map
+                </Button>
+            </a>
+
           </div>
 
           {/* Stats */}
@@ -49,7 +62,7 @@ const Hero = () => {
               const Icon = stat.icon;
               return (
                 <div key={stat.label} className="text-center">
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-white/20 rounded-full mb-3">
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-white/20 rounded-full mb-3 backdrop-blur-sm">
                     <Icon className="h-6 w-6 text-white" />
                   </div>
                   <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>

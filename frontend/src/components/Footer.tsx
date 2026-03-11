@@ -1,43 +1,64 @@
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Droplets, Facebook, Twitter, Instagram, Linkedin, Mail, MapPin, Phone } from "lucide-react";
+import { Droplets, Facebook, Twitter, Instagram, Linkedin, Mail, MapPin, Phone, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
+  const { toast } = useToast();
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubscribe = () => {
+    if (!email || !email.includes("@")) {
+        toast({ variant: "destructive", title: "Invalid Email", description: "Please enter a valid email address." });
+        return;
+    }
+    setLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+        setLoading(false);
+        toast({ title: "Subscribed! 🌊", description: "You are now part of the wave." });
+        setEmail("");
+    }, 1500);
+  };
+
   const footerSections = [
     {
       title: "Get Involved",
       links: [
-        "Start a Drive",
-        "Join Cleanup",
-        "Volunteer",
-        "Partner with Us"
+        { name: "Start a Drive", href: "/#start-drive" },
+        { name: "Join Cleanup", href: "/#join-drives" },
+        { name: "Report Pollution", href: "/impact" },
+        { name: "Partner with Us", href: "/register" }
       ]
     },
     {
       title: "Resources",
       links: [
-        "Impact Map",
-        "Educational Materials",
-        "Research Reports",
-        "Best Practices"
+        { name: "Impact Map", href: "/impact" },
+        { name: "Recycling Centers", href: "/impact" },
+        { name: "Educational Materials", href: "/#donate" }, // Points to awareness section
+        { name: "Research Reports", href: "#" }
       ]
     },
     {
       title: "Community",
       links: [
-        "Contributors",
-        "NGO Partners",
-        "Success Stories",
-        "Events Calendar"
+        { name: "Top Contributors", href: "/#contributors" },
+        { name: "NGO Partners", href: "/#ngo-partners" },
+        { name: "Success Stories", href: "/#impact-map" },
+        { name: "Events Calendar", href: "/#join-drives" }
       ]
     },
     {
       title: "Support",
       links: [
-        "Donate",
-        "Corporate Partnerships",
-        "Grant Programs",
-        "Contact Us"
+        { name: "Donate", href: "/#donate" },
+        { name: "Corporate Partnerships", href: "/#ngo-partners" },
+        { name: "Grant Programs", href: "#" },
+        { name: "Contact Us", href: "#" }
       ]
     }
   ];
@@ -70,13 +91,15 @@ const Footer = () => {
             {/* Newsletter Signup */}
             <div>
               <h4 className="font-semibold mb-3">Stay Updated</h4>
-              <div className="flex max-w-sm">
+              <div className="flex max-w-sm gap-2">
                 <Input 
                   placeholder="Enter your email" 
                   className="bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/60"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
-                <Button variant="secondary" className="ml-2 shrink-0">
-                  Subscribe
+                <Button variant="secondary" className="shrink-0" onClick={handleSubscribe} disabled={loading}>
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Subscribe"}
                 </Button>
               </div>
             </div>
@@ -88,13 +111,22 @@ const Footer = () => {
               <h4 className="font-semibold mb-4">{section.title}</h4>
               <ul className="space-y-2">
                 {section.links.map((link) => (
-                  <li key={link}>
-                    <a 
-                      href="#" 
-                      className="text-primary-foreground/80 hover:text-primary-foreground transition-colors duration-200"
-                    >
-                      {link}
-                    </a>
+                  <li key={link.name}>
+                    {link.href.startsWith("/") ? (
+                         <Link 
+                            to={link.href}
+                            className="text-primary-foreground/80 hover:text-primary-foreground transition-colors duration-200 text-sm"
+                         >
+                            {link.name}
+                         </Link>
+                    ) : (
+                        <a 
+                          href={link.href} 
+                          className="text-primary-foreground/80 hover:text-primary-foreground transition-colors duration-200 text-sm"
+                        >
+                          {link.name}
+                        </a>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -108,18 +140,18 @@ const Footer = () => {
             {/* Contact Information */}
             <div>
               <h4 className="font-semibold mb-3">Contact Us</h4>
-              <div className="space-y-2 text-primary-foreground/80">
+              <div className="space-y-2 text-primary-foreground/80 text-sm">
                 <div className="flex items-center">
                   <Mail className="h-4 w-4 mr-2" />
-                  <span>hello@rippleofchange.org</span>
+                  <span>contact@rippleofchange.org</span>
                 </div>
                 <div className="flex items-center">
                   <Phone className="h-4 w-4 mr-2" />
-                  <span>+1 (555) 123-4567</span>
+                  <span>+91 11 2345 6789</span>
                 </div>
                 <div className="flex items-center">
                   <MapPin className="h-4 w-4 mr-2" />
-                  <span>Global Headquarters, Earth</span>
+                  <span>Connaught Place, New Delhi, India</span>
                 </div>
               </div>
             </div>
@@ -157,7 +189,7 @@ const Footer = () => {
           {/* Bottom Bar */}
           <div className="border-t border-primary-foreground/20 pt-6 flex flex-col md:flex-row justify-between items-center">
             <div className="text-primary-foreground/80 text-sm mb-4 md:mb-0">
-              © 2024 Ripple of Change. All rights reserved. | Privacy Policy | Terms of Service
+              © 2025 Ripple of Change. All rights reserved. | Privacy Policy | Terms of Service
             </div>
             <div className="text-primary-foreground/80 text-sm">
               Made with 💙 for our planet

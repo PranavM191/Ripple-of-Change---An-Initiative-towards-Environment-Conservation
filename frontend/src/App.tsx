@@ -1,12 +1,14 @@
-// src/App.tsx
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom"; // Removed 'Link' as it's no longer used here
+import Header from "@/components/Header";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import MapPage from "./pages/MapPage"; // <-- add this
+import MapPage from "./pages/MapPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 
 const queryClient = new QueryClient();
 
@@ -16,16 +18,17 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        {/* Optional minimal nav to reach the map while developing */}
-        <nav style={{ padding: 12, borderBottom: "1px solid #eee" }}>
-          <Link to="/" style={{ marginRight: 12 }}>Home</Link>
-          <Link to="/impact">Impact Map</Link>
-        </nav>
+        {/* The Header is now outside Routes so it shows on every page */}
+        <Header />
 
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/impact" element={<MapPage />} /> {/* <-- new route */}
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/impact" element={<MapPage />} />
+          
+          {/* --- AUTH ROUTES --- */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

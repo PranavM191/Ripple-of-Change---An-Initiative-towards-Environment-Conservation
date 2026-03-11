@@ -12,8 +12,8 @@ import java.util.Set;
 @Data
 @Entity
 @Table(name = "drives")
-@EqualsAndHashCode(exclude = "participants") // Add this
-@ToString(exclude = "participants") // Add this
+@EqualsAndHashCode(exclude = "participants")
+@ToString(exclude = "participants")
 public class Drive {
 
     @Id
@@ -42,13 +42,23 @@ public class Drive {
     @JoinColumn(name = "organizer_id", nullable = false)
     private User organizer;
 
-    // --- NEW RELATIONSHIP ---
-    // A Drive can have many participants (Users).
     @ManyToMany
     @JoinTable(
-            name = "drive_participants", // Name of the new "join" table
+            name = "drive_participants",
             joinColumns = @JoinColumn(name = "drive_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<User> participants = new HashSet<>();
+
+    // --- NEW FIELDS FOR "WE MADE A DIFFERENCE" ---
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private DriveStatus status = DriveStatus.UPCOMING; // Default to UPCOMING
+
+    @Column
+    private Double wasteCollected; // In Kilograms (e.g., 50.5)
+
+    @Column
+    private String afterPhotoUrl; // Path to the "After" image
 }

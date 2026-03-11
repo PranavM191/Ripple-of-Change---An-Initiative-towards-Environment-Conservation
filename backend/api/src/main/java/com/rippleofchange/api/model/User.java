@@ -38,6 +38,10 @@ public class User {
     @Column // This can be null, so no "nullable = false"
     private String organizationName; // The name of the NGO (e.g., "Clean Ganga Foundation")
 
+    // --- NEW FIELD: POINTS ---
+    @Column(nullable = false)
+    private Integer points = 0; // Default to 0
+
     // --- EXISTING RELATIONSHIPS ---
     @ManyToMany(mappedBy = "participants")
     @JsonIgnore

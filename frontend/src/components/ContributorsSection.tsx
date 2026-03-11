@@ -1,85 +1,79 @@
+import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Trophy, Star, Medal, Crown, Gift, Zap } from "lucide-react";
+import { getLeaderboard, getCurrentUser } from "@/services/apiService";
+
+// Match backend User model
+interface User {
+  id: number;
+  fullName: string;
+  email: string;
+  points: number;
+}
 
 const ContributorsSection = () => {
-  const topContributors = [
-    {
-      id: 1,
-      name: "Sarah Chen",
-      avatar: "/placeholder.svg",
-      points: 15420,
-      level: "Water Guardian",
-      contributions: 89,
-      badge: "crown",
-      achievements: ["Top Monthly Contributor", "Photo Quality Expert", "Community Leader"]
-    },
-    {
-      id: 2,
-      name: "Miguel Rodriguez",
-      avatar: "/placeholder.svg",
-      points: 12680,
-      level: "Ocean Protector",
-      contributions: 67,
-      badge: "trophy",
-      achievements: ["Cleanup Master", "NGO Partner", "Impact Creator"]
-    },
-    {
-      id: 3,
-      name: "Aisha Patel",
-      avatar: "/placeholder.svg",
-      points: 10950,
-      level: "River Defender",
-      contributions: 54,
-      badge: "medal",
-      achievements: ["Data Contributor", "Education Ambassador", "Local Hero"]
-    }
-  ];
+  const [topContributors, setTopContributors] = useState<User[]>([]);
+  const [myPoints, setMyPoints] = useState(0);
+  const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
 
-  const rewards = [
-    {
-      name: "Eco-Friendly Water Bottle",
-      points: 500,
-      description: "Sustainable steel water bottle",
-      available: 45,
-      icon: Gift
-    },
-    {
-      name: "Cleanup Starter Kit",
-      points: 1000,
-      description: "Complete cleanup equipment set",
-      available: 23,
-      icon: Zap
-    },
-    {
-      name: "Tree Planting Certificate",
-      points: 1500,
-      description: "Plant a tree in your name",
-      available: 12,
-      icon: Star
-    }
-  ];
+  useEffect(() => {
+    const loadLeaderboard = async () => {
+      try {
+        // 1. Get top users from API
+        const data = await getLeaderboard();
+        setTopContributors(data);
 
-  const getBadgeIcon = (badge: string) => {
-    switch (badge) {
-      case 'crown': return Crown;
-      case 'trophy': return Trophy;
-      case 'medal': return Medal;
+        // 2. Check my own points
+        const email = getCurrentUser();
+        setCurrentUserEmail(email);
+        
+        if (email && data.length > 0) {
+            // Simple way: if I'm in the top 10, show my points. 
+            // Ideally, we'd have a separate /me endpoint for profile details.
+            const me = data.find((u: User) => u.email === email);
+            if (me) setMyPoints(me.points);
+        }
+      } catch (error) {
+        console.error("Failed to load leaderboard", error);
+      }
+    };
+
+    loadLeaderboard();
+  }, []);
+
+  // Helper to get initials
+  const getInitials = (name: string) => {
+      return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  };
+
+  const getBadgeIcon = (index: number) => {
+    switch (index) {
+      case 0: return Crown;
+      case 1: return Trophy;
+      case 2: return Medal;
       default: return Star;
     }
   };
 
-  const getBadgeColor = (badge: string) => {
-    switch (badge) {
-      case 'crown': return 'text-yellow-500';
-      case 'trophy': return 'text-amber-500';
-      case 'medal': return 'text-orange-500';
+  const getBadgeColor = (index: number) => {
+    switch (index) {
+      case 0: return 'text-yellow-500';
+      case 1: return 'text-amber-500';
+      case 2: return 'text-orange-500';
       default: return 'text-primary';
     }
   };
+
+  // Static Rewards Data (Keep this for display)
+  const rewards = [
+    { name: "Eco-Friendly Bottle", points: 500, available: 45, icon: Gift },
+    { name: "Cleanup Kit", points: 1000, available: 23, icon: Zap },
+    { name: "Plant a Tree", points: 1500, available: 12, icon: Star }
+  ];
 
   return (
     <section id="contributors" className="py-20 bg-background">
@@ -89,69 +83,64 @@ const ContributorsSection = () => {
             Top Contributors & Rewards
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Recognize our water warriors making the biggest impact. Earn points for every contribution 
-            and unlock exclusive rewards that support your environmental mission.
+            Recognize our water warriors making the biggest impact.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
-          {/* Top Contributors Leaderboard */}
+          
+          {/* --- REAL LEADERBOARD --- */}
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Trophy className="mr-2 h-5 w-5 text-primary" />
-                  Top Contributors This Month
+                  Top Contributors
                 </CardTitle>
-                <CardDescription>
-                  Champions making the biggest impact in water conservation
-                </CardDescription>
+                <CardDescription>Champions making the biggest impact</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {topContributors.map((contributor, index) => {
-                  const BadgeIcon = getBadgeIcon(contributor.badge);
-                  const badgeColor = getBadgeColor(contributor.badge);
-                  
-                  return (
-                    <div key={contributor.id} className="flex items-center space-x-4 p-4 rounded-lg bg-gradient-surface">
-                      <div className="relative">
-                        <div className={`absolute -top-2 -right-2 ${badgeColor}`}>
-                          <BadgeIcon className="h-5 w-5" />
-                        </div>
-                        <Avatar className="h-12 w-12">
-                          <AvatarImage src={contributor.avatar} alt={contributor.name} />
-                          <AvatarFallback>{contributor.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                        </Avatar>
-                      </div>
+                {topContributors.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">No contributions yet. Be the first!</p>
+                ) : (
+                    topContributors.map((contributor, index) => {
+                      const BadgeIcon = getBadgeIcon(index);
+                      const badgeColor = getBadgeColor(index);
                       
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <h4 className="font-semibold text-foreground">{contributor.name}</h4>
-                          <Badge variant="secondary">{contributor.level}</Badge>
+                      return (
+                        <div key={contributor.id} className="flex items-center space-x-4 p-4 rounded-lg bg-gradient-surface">
+                          <div className="relative">
+                            <div className={`absolute -top-2 -right-2 ${badgeColor}`}>
+                              <BadgeIcon className="h-5 w-5" />
+                            </div>
+                            <Avatar className="h-12 w-12">
+                              <AvatarImage src="" alt={contributor.fullName} />
+                              <AvatarFallback>{getInitials(contributor.fullName)}</AvatarFallback>
+                            </Avatar>
+                          </div>
+                          
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <h4 className="font-semibold text-foreground">
+                                {contributor.fullName}
+                                {contributor.email === currentUserEmail && <Badge className="ml-2 bg-blue-100 text-blue-800">You</Badge>}
+                              </h4>
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {contributor.points.toLocaleString()} points
+                            </div>
+                          </div>
+                          
+                          <div className="text-2xl font-bold text-primary">#{index + 1}</div>
                         </div>
-                        <div className="text-sm text-muted-foreground mb-2">
-                          {contributor.points.toLocaleString()} points • {contributor.contributions} contributions
-                        </div>
-                        <div className="flex flex-wrap gap-1">
-                          {contributor.achievements.slice(0, 2).map((achievement) => (
-                            <Badge key={achievement} variant="outline" className="text-xs">
-                              {achievement}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                      
-                      <div className="text-2xl font-bold text-primary">
-                        #{index + 1}
-                      </div>
-                    </div>
-                  );
-                })}
+                      );
+                    })
+                )}
               </CardContent>
             </Card>
           </div>
 
-          {/* Points & Level System */}
+          {/* --- YOUR PROGRESS --- */}
           <div className="space-y-6">
             <Card>
               <CardHeader>
@@ -159,49 +148,36 @@ const ContributorsSection = () => {
                 <CardDescription>Keep contributing to level up!</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span>Current Level: River Defender</span>
-                      <span>2,150 / 5,000 XP</span>
+                {currentUserEmail ? (
+                    <div className="space-y-4">
+                      <div className="text-center">
+                        <div className="text-4xl font-bold text-primary">{myPoints}</div>
+                        <div className="text-sm text-muted-foreground">Total Points</div>
+                      </div>
+                      <Progress value={Math.min((myPoints / 100) * 100, 100)} className="h-2" />
+                      <p className="text-xs text-center text-muted-foreground">Next Reward at 100 pts</p>
                     </div>
-                    <Progress value={43} className="h-2" />
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">2,150</div>
-                    <div className="text-sm text-muted-foreground">Total Points</div>
-                  </div>
-                </div>
+                ) : (
+                    <div className="text-center py-6">
+                        <p className="text-muted-foreground mb-4">Log in to see your points</p>
+                        <Button variant="outline" asChild><a href="/login">Log In</a></Button>
+                    </div>
+                )}
               </CardContent>
             </Card>
 
+            {/* Static Points Info */}
             <Card>
-              <CardHeader>
-                <CardTitle>How to Earn Points</CardTitle>
-              </CardHeader>
+              <CardHeader><CardTitle>How to Earn Points</CardTitle></CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-sm">Upload photo</span>
-                  <Badge variant="outline">+10 pts</Badge>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">Report pollution</span>
-                  <Badge variant="outline">+25 pts</Badge>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">Join cleanup drive</span>
-                  <Badge variant="outline">+100 pts</Badge>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">Organize drive</span>
-                  <Badge variant="outline">+250 pts</Badge>
-                </div>
+                <div className="flex justify-between"><span className="text-sm">Report pollution</span><Badge variant="outline">+10 pts</Badge></div>
+                <div className="flex justify-between"><span className="text-sm">Join cleanup drive</span><Badge variant="outline">+50 pts</Badge></div>
               </CardContent>
             </Card>
           </div>
         </div>
 
-        {/* Rewards Section */}
+        {/* --- REWARDS (Static Display) --- */}
         <div>
           <h3 className="text-2xl font-bold text-foreground text-center mb-8">Exclusive Rewards</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -214,16 +190,10 @@ const ContributorsSection = () => {
                       <Icon className="h-8 w-8 text-primary" />
                     </div>
                     <CardTitle className="text-lg">{reward.name}</CardTitle>
-                    <CardDescription>{reward.description}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-primary mb-2">{reward.points} pts</div>
-                    <div className="text-sm text-muted-foreground mb-4">
-                      {reward.available} available
-                    </div>
-                    <Button className="w-full" variant="outline">
-                      Redeem Reward
-                    </Button>
+                    <Button className="w-full" variant="outline" disabled>Coming Soon</Button>
                   </CardContent>
                 </Card>
               );
